@@ -1,0 +1,304 @@
+PROGRAMME moupion
+
+TYPE
+	choix_case = 1..9
+
+TYPE
+	cases = ENREGISTEMENT
+		croix : BOOLEEN
+		rond : BOOLEEN
+FIN
+
+TYPE
+	joueur = ENREGISTEMENT
+		actif : BOOLEEN
+		nom : CHAINE 
+		nb_partie_win : ENTIER
+FIN
+
+TYPE
+	tableau_cases = TABLEAU [1..3,1..3] DE cases 
+
+TYPE
+	tableau_cases_utiliser = TABLEAU [1..9] DE BOOLEEN
+
+PROCEDURE affichage(tab_cases : tableau_cases)
+
+	VAR
+		i,j : ENTIER
+	DEBUT
+		SetColou(white)
+		line(0,100,300,100)
+		line(0,200,300,200)
+		line(100,0,100,300)
+		line(200,0,200,300) // affiche la grille du moupion
+
+		line(300,350,450,350)
+		line(300,400,450,400)
+		line(350,300,350,450)
+		line(400,300,400,450) // affiche une petite grille de moupion
+		OutTextXY (325,325,'1')
+		OutTextXY (325,375,'2')
+		OutTextXY (325,425,'3')
+		OutTextXY (375,325,'4')
+		OutTextXY (375,375,'5')
+		OutTextXY (375,425,'6')
+		OutTextXY (425,325,'7')
+		OutTextXY (425,375,'8')
+		OutTextXY (425,425,'9')
+
+
+		POUR i<-1 A 3 FAIRE
+			POUR j<-1 A 3 FAIRE
+				DEBUT
+					SI tab_cases[i,j].croix = VRAI ALORS
+						DEBUT
+							SetColou(Red)
+							line((i-1)*100+10,(j-1)*100+10,i*100-10,j*100-10)
+							line(i*100-10,(j-1)*100+10,(i-1)*100+10,j*100-10)
+						FIN
+					SI  tab_cases[i,j].rond = VRAI ALORS
+						DEBUT
+							SetColou(Blue)
+							circle(i*100-50,j*100-50,40)
+						FIN
+				FIN
+	FIN
+
+
+FONCTION verif_case_vide(case_select : ENTIER ;VAR tab_cases_utiliser : tableau_cases_utiliser) : BOOLEEN
+
+	VAR
+		test : BOOLEEN
+	DEBUT
+
+		SI (tab_cases_utiliser[case_select]) ALORS
+			test <- FAUX
+		SINON
+			DEBUT
+				test <- VRAI
+				tab_cases_utiliser[case_select]<-VRAI
+			FIN
+		verif_case_vide<-test
+	FIN
+
+FONCTION verif_victoire_croix(tab_cases : tableau_cases) : BOOLEEN
+
+	VAR
+
+		i,j :ENTIER
+		victoire_croix : BOOLEEN
+
+	DEBUT
+		victoire_croix <- FAUX
+		POUR j <- 1 A 3 FAIRE
+			DEBUT
+				POUR i <- 1 A 3 FAIRE
+					DEBUT
+						SI ((i = 1) ET (j = 1))ALORS
+							DEBUT
+								SI (tab_cases[i,j].croix) ET (tab_cases[i+1,j].croix) ET (tab_cases[i+2,j].croix) ALORS
+									victoire_croix<-VRAI
+								SINON
+									SI (tab_cases[i,j].croix) ET (tab_cases[i,j+1].croix) ET (tab_cases[i,j+2].croix) ALORS
+										victoire_croix<-VRAI
+									SINON
+										SI (tab_cases[i,j].croix) ET (tab_cases[i+1,j+1].croix) ET (tab_cases[i+2,j+2].croix) ALORS
+											victoire_croix<-VRAI
+							FIN
+						SI ((i = 2) ET (j = 1))ALORS
+							SI (tab_cases[i,j].croix) ET (tab_cases[i,j+1].croix) ET (tab_cases[i,j+2].croix) ALORS
+								victoire_croix <- VRAI
+
+						SI ((i = 3) ET (j = 1))ALORS
+							SI (tab_cases[i,j].croix) ET (tab_cases[i,j+1].croix) ET (tab_cases[i,j+2].croix) ALORS
+								victoire_croix <- VRAI
+
+						SI ((j = 2) ET (i = 1)) ALORS
+							SI (tab_cases[i,j].croix) ET (tab_cases[i+1,j].croix) ET (tab_cases[i+2,j].croix) ALORS
+								victoire_croix <- VRAI
+
+						SI ((j = 3) ET (i = 1)) ALORS
+							SI (tab_cases[i,j].croix) ET (tab_cases[i+1,j].croix) ET (tab_cases[i+2,j].croix) ALORS
+								victoire_croix <- VRAI
+					FIN
+			FIN
+
+		verif_victoire_croix<-victoire_croix
+	FIN
+
+FONCTION verif_victoire_rond(tab_cases : tableau_cases) : BOOLEEN
+
+	VAR
+
+		i,j :ENTIER
+		victoire_rond : BOOLEEN
+
+	DEBUT
+		victoire_rond <- FAUX
+		POUR j <- 1 A 3 FAIRE
+			DEBUT
+				POUR i <- 1 A 3 FAIRE
+					DEBUT
+						SI ((i = 1) ET (j = 1)) ALORS
+							DEBUT
+								SI (tab_cases[i,j].rond) ET (tab_cases[i+1,j].rond) ET (tab_cases[i+2,j].rond) ALORS
+									victoire_rond<-VRAI
+								SINON
+									SI (tab_cases[i,j].rond) ET (tab_cases[i,j+1].rond) ET (tab_cases[i,j+2].rond) ALORS
+										victoire_rond<-VRAI
+									SINON
+										SI (tab_cases[i,j].rond) ET (tab_cases[i+1,j+1].rond) ET (tab_cases[i+2,j+2].rond) ALORS
+											victoire_rond<-VRAI
+							FIN
+						SI ((i = 2) ET (j = 1))ALORS
+							SI (tab_cases[i,j].rond) ET (tab_cases[i,j+1].rond) ET (tab_cases[i,j+2].rond) ALORS
+								victoire_rond <- VRAI
+
+						SI ((i = 3) ET (j = 1))ALORS
+							SI (tab_cases[i,j].rond) ET (tab_cases[i,j+1].rond) ET (tab_cases[i,j+2].rond) ALORS
+								victoire_rond <- VRAI
+
+						SI ((j = 2) ET (i = 1)) ALORS
+							SI (tab_cases[i,j].rond) ET (tab_cases[i+1,j].rond) ET (tab_cases[i+2,j].rond) ALORS
+								victoire_rond <- VRAI
+
+						SI ((j = 3) ET (i = 1)) ALORS
+							SI (tab_cases[i,j].rond) ET (tab_cases[i+1,j].rond) ET (tab_cases[i+2,j].rond) ALORS
+								victoire_rond <- VRAI
+					FIN
+			FIN
+		verif_victoire_rond<-victoire_rond
+	FIN
+
+PROCEDURE tour_de_jeu (VAR tab_cases : tableau_cases ;VAR  tab_cases_utiliser : tableau_cases_utiliser ;VAR joueur_croix,joueur_rond : joueur)
+
+	VAR
+
+		case_select : ENTIER
+
+	DEBUT
+
+		REPETER
+			ECRIRE ('entrer le chiffre de la case ou dans la quel vous voulez mettre signe')
+			LIRE (case_select)
+		JUSQU'A ( (case_select <10) ET (case_select >0) ET (verif_case_vide(case_select ,tab_cases_utiliser) ) )
+		SI (joueur_croix.actif) ALORS
+			DEBUT
+				CAS case_select DE
+					1:tab_cases[1,1].croix<-VRAI
+					2:tab_cases[1,2].croix<-VRAI
+					3:tab_cases[1,3].croix<-VRAI
+					4:tab_cases[2,1].croix<-VRAI
+					5:tab_cases[2,2].croix<-VRAI
+					6:tab_cases[2,3].croix<-VRAI
+					7:tab_cases[3,1].croix<-VRAI
+					8:tab_cases[3,2].croix<-VRAI
+					9:tab_cases[3,3].croix<-VRAI
+				FIN
+			FIN
+		SI (joueur_rond.actif) ALORS
+			DEBUT
+				case case_select DE
+					1:tab_cases[1,1].rond<-VRAI
+					2:tab_cases[1,2].rond<-VRAI
+					3:tab_cases[1,3].rond<-VRAI
+					4:tab_cases[2,1].rond<-VRAI
+					5:tab_cases[2,2].rond<-VRAI
+					6:tab_cases[2,3].rond<-VRAI
+					7:tab_cases[3,1].rond<-VRAI
+					8:tab_cases[3,2].rond<-VRAI
+					9:tab_cases[3,3].rond<-VRAI
+				FIN
+			FIN
+	FIN
+
+PROCEDURE initalisation (VAR joueur_croix,joueur_rond : joueur ;VAR  tab_cases_utiliser : tableau_cases_utiliser ;VAR  tab_cases : tableau_cases)
+
+	VAR
+
+		i,j : ENTIER
+
+	DEBUT
+
+		POUR i<-1 A 9 FAIRE
+			tab_cases_utiliser[i]<-FAUX
+		joueur_croix.actif<-VRAI
+		joueur_rond.actif<-FAUX
+
+		POUR i<-1 A 3 FAIRE
+			POUR j<-1 A 3 FAIRE
+				DEBUT
+					tab_cases[i,j].croix<-FAUX
+					tab_cases[i,j].rond<-FAUX
+				FIN
+	FIN
+
+
+
+PROCEDURE changement_joueur(VAR joueur_croix,joueur_rond : joueur)
+
+	DEBUT
+
+		SI joueur_croix.actif ALORS
+			DEBUT
+				joueur_croix.actif<-FAUX
+				joueur_rond.actif<-VRAI
+			FIN
+		SINON
+			DEBUT
+				joueur_croix.actif<-VRAI
+				joueur_rond.actif<-FAUX
+			FIN
+	FIN
+
+VAR
+	gd, gm: ENTIER
+	tab_cases : tableau_cases
+	tab_cases_utiliser : tableau_cases_utiliser
+	joueur_croix,joueur_rond : joueur
+	compteur,nb_partie : ENTIER
+
+DEBUT
+	gd <- vga
+	gm <- vgahi
+	initgraph(gd, gm, '')
+	SI graphresult = grok ALORS
+		ECRIRE ('combien de partie pour finir le jeu ?')
+		LIRE (nb_partie)
+		REPETER
+			ECRIRE ('entrer le nom du joueur croix')
+			LIRE (joueur_croix.nom)
+			ECRIRE ('entrer le nom du joueur rond')
+			LIRE (joueur_rond.nom)
+			affichage(tab_cases)
+			initalisation(joueur_croix,joueur_rond , tab_cases_utiliser , tab_cases)
+			REPETER
+				compteur<-compteur+1
+				Aur_de_jeu (tab_cases , tab_cases_utiliser , joueur_croix,joueur_rond)
+				affichage(tab_cases)
+				SI (compteur > 4) ALORS
+					DEBUT
+						SI (verif_victoire_croix(tab_cases)) ALORS
+							DEBUT
+								ECRIRE ('le joueur :'&joueur_croix.nom&' rempoute la partie')
+								joueur_croix.nb_partie_win<-joueur_croix.nb_partie_win+1
+							FIN
+						SI (verif_victoire_rond(tab_cases)) ALORS
+							DEBUT
+								ECRIRE ('le joueur :'&joueur_rond.nom&' rempoute la partie')
+								joueur_rond.nb_partie_win<-joueur_rond.nb_partie_win+1
+							FIN
+						SI (verif_victoire_croix(tab_cases) = FAUX) ET (verif_victoire_rond(tab_cases) = FAUX) ET (compteur=9) ALORS
+							DEBUT
+								ECRIRE ('egaliter parfaite ! ')
+							FIN
+					FIN
+				changement_joueur(joueur_croix,joueur_rond)
+			JUSQU'A (verif_victoire_croix(tab_cases)) ou (verif_victoire_rond(tab_cases)) ou (compteur=9) 
+	    JUSQU'A (joueur_rond.nb_partie_win = nb_partie) ou (joueur_rond.nb_partie_win = nb_partie)
+	    SI (joueur_rond.nb_partie_win = nb_partie) ALORS
+	    	ECRIRE ('le joueur :' & joueur_rond.nom & ' rempoute la Game')
+	    SINON
+	    	ECRIRE ('le joueur :' & joueur_croix.nom & ' rempoute la Game')
+FIN.			
